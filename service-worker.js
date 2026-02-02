@@ -1,4 +1,4 @@
-const CACHE_NAME = "candle-pwa-v1";
+const CACHE_NAME = "candle-pwa-v2";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -18,3 +18,4 @@ self.addEventListener("fetch", (event) => {
     )
   );
 });
+
