@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Калькулятор свічок</title>
 
   <!-- PWA -->
@@ -10,7 +10,6 @@
   <meta name="theme-color" content="#7c5cff">
 
   <style>
-    /* ===== ВЕСЬ ТВОЙ СТИЛЬ (без изменений) ===== */
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -24,29 +23,29 @@
     }
     h1{margin:0;font-size:18px}
     main{padding:16px}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
     .tab{
-      padding:8px 12px;
+      padding:8px 14px;
       border-radius:999px;
       background:#1b2035;
       cursor:pointer;
       font-size:13px;
     }
     .tab.active{background:#7c5cff}
+
     .view{display:none}
     .view.active{display:block}
+
     .card{
       background:#121625;
       border:1px solid #24304a;
       border-radius:16px;
-      padding:12px;
-      margin-bottom:12px;
+      padding:14px;
+      margin-bottom:14px;
     }
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{padding:8px;border-bottom:1px solid #24304a}
-    th{text-align:left;color:#a7b0c0}
-    .right{text-align:right}
-    input{
+
+    input, select{
       width:100%;
       padding:10px;
       border-radius:12px;
@@ -54,8 +53,9 @@
       background:#1b2035;
       color:white;
     }
+
     button{
-      padding:10px 12px;
+      padding:10px 14px;
       border-radius:12px;
       border:none;
       background:#7c5cff;
@@ -63,7 +63,29 @@
       cursor:pointer;
     }
     button.danger{background:#ff4d6d}
-    .row{display:grid;gap:8px;margin-bottom:8px}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      margin-top:8px;
+    }
+    th,td{
+      padding:8px;
+      border-bottom:1px solid #24304a;
+    }
+    th{color:#a7b0c0;text-align:left}
+    .right{text-align:right}
+
+    .row{
+      display:grid;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    @media(min-width:700px){
+      .row.cols2{grid-template-columns:1fr 1fr}
+      .row.cols3{grid-template-columns:1fr 1fr 1fr}
+    }
   </style>
 </head>
 
@@ -77,45 +99,53 @@
 
   <div class="tabs">
     <div class="tab active" data-tab="stock">Склад</div>
+    <div class="tab" data-tab="general">Загальний розрахунок</div>
     <div class="tab" data-tab="one">Одна свічка</div>
+    <div class="tab" data-tab="candles">Всі свічки</div>
+    <div class="tab" data-tab="finished">Готові свічки</div>
   </div>
 
-  <!-- ===== СКЛАД ===== -->
+  <!-- ================= СКЛАД ================= -->
   <div class="view active" id="stock">
     <div class="card">
       <h3>Склад (залишки)</h3>
 
-      <div class="row">
+      <div class="row cols3">
         <input id="stockName" placeholder="Матеріал">
-        <input id="stockQty" placeholder="Залишок (кг або шт)">
-        <button onclick="addStock()">Додати</button>
+        <input id="stockQty" placeholder="Кількість">
+        <select id="stockUnit">
+          <option value="kg">кг</option>
+          <option value="pcs">шт</option>
+        </select>
       </div>
+
+      <button onclick="addStock()">Додати</button>
 
       <table>
         <thead>
-          <tr><th>Матеріал</th><th class="right">Залишок</th></tr>
+          <tr>
+            <th>Матеріал</th>
+            <th>Од.</th>
+            <th class="right">Залишок</th>
+          </tr>
         </thead>
         <tbody id="stockTable"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- ===== ОДНА СВІЧКА ===== -->
-  <div class="view" id="one">
+  <!-- ================= ОБЩИЙ РАСЧЕТ ================= -->
+  <div class="view" id="general">
     <div class="card">
-      <h3>Одна свічка</h3>
+      <h3>Загальний розрахунок</h3>
 
-      <div class="row">
-        <input id="candleName" placeholder="Назва свічки">
-        <input id="sellPrice" placeholder="Ціна продажу (грн)">
+      <div class="row cols3">
+        <input id="genName" placeholder="Матеріал">
+        <input id="genQty" placeholder="Кількість">
+        <input id="genPrice" placeholder="Ціна (грн)">
       </div>
 
-      <div class="row">
-        <input id="matName" placeholder="Матеріал">
-        <input id="matQty" placeholder="Вага (г)">
-        <input id="matPrice" placeholder="Ціна (грн/кг)">
-        <button onclick="addMaterial()">Додати матеріал</button>
-      </div>
+      <button onclick="addGeneral()">Додати</button>
 
       <table>
         <thead>
@@ -124,88 +154,194 @@
             <th class="right">Собівартість</th>
           </tr>
         </thead>
-        <tbody id="matTable"></tbody>
+        <tbody id="genTable"></tbody>
       </table>
 
-      <p>Собівартість: <b id="cost">0</b> грн</p>
-      <p>Маржа: <b id="margin">—</b></p>
+      <p><b>Разом:</b> <span id="genTotal">0</span> грн</p>
+    </div>
+  </div>
+
+  <!-- ================= ОДНА СВЕЧА ================= -->
+  <div class="view" id="one">
+    <div class="card">
+      <h3>Одна свічка</h3>
+
+      <div class="row cols2">
+        <input id="oneName" placeholder="Назва свічки">
+        <input id="onePrice" placeholder="Ціна продажу (грн)">
+      </div>
+
+      <div class="row cols3">
+        <input id="oneMat" placeholder="Матеріал">
+        <input id="oneQty" placeholder="Вага (г)">
+        <input id="oneCost" placeholder="Ціна (грн/кг)">
+      </div>
+
+      <button onclick="addOne()">Додати матеріал</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Матеріал</th>
+            <th class="right">Собівартість</th>
+          </tr>
+        </thead>
+        <tbody id="oneTable"></tbody>
+      </table>
+
+      <p>Собівартість: <b id="oneTotal">0</b> грн</p>
+      <p>Прибуток: <b id="oneProfit">—</b></p>
+      <p>Маржа: <b id="oneMargin">—</b></p>
+
+      <button onclick="saveCandle()">Зберегти свічку</button>
+    </div>
+  </div>
+
+  <!-- ================= ВСЕ СВЕЧИ ================= -->
+  <div class="view" id="candles">
+    <div class="card">
+      <h3>Всі свічки</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Назва</th>
+            <th class="right">Собівартість</th>
+            <th class="right">Ціна</th>
+            <th class="right">Маржа %</th>
+          </tr>
+        </thead>
+        <tbody id="candlesTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= ГОТОВЫЕ СВЕЧИ ================= -->
+  <div class="view" id="finished">
+    <div class="card">
+      <h3>Готові свічки</h3>
+
+      <div class="row cols3">
+        <input id="finName" placeholder="Назва">
+        <input id="finQty" placeholder="Кількість">
+        <input id="finPrice" placeholder="Ціна (грн)">
+      </div>
+
+      <button onclick="addFinished()">Додати</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Назва</th>
+            <th class="right">К-ть</th>
+            <th class="right">Виручка</th>
+          </tr>
+        </thead>
+        <tbody id="finTable"></tbody>
+      </table>
     </div>
   </div>
 
 </main>
 
 <script>
-  /* ===== ПРОСТАЯ ЛОГИКА (пример) ===== */
-  const stock = JSON.parse(localStorage.getItem("stock")||"[]");
-  const mats = [];
+/* ===== ДАННЫЕ ===== */
+const stock = JSON.parse(localStorage.getItem("stock")||"[]");
+const general = [];
+const one = [];
+const candles = [];
+const finished = [];
 
-  function save(){
-    localStorage.setItem("stock", JSON.stringify(stock));
-  }
+function saveStock(){localStorage.setItem("stock",JSON.stringify(stock));}
 
-  function renderStock(){
-    const t = document.getElementById("stockTable");
-    t.innerHTML="";
-    stock.forEach(s=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${s.name}</td><td class="right">${s.qty}</td>`;
-      tr.ondblclick=()=>{
-        const n=prompt("Новий залишок:",s.qty);
-        if(n!==null){s.qty=parseFloat(n);save();renderStock();}
-      }
-      t.appendChild(tr);
-    });
-  }
-
-  function addStock(){
-    const name=stockName.value.trim();
-    const qty=parseFloat(stockQty.value);
-    if(!name||isNaN(qty))return;
-    stock.push({name,qty});
-    save();
-    stockName.value="";
-    stockQty.value="";
-    renderStock();
-  }
-
-  function addMaterial(){
-    const q=parseFloat(matQty.value);
-    const p=parseFloat(matPrice.value);
-    if(isNaN(q)||isNaN(p))return;
-    const cost=(q/1000)*p;
-    mats.push(cost);
-    matTable.innerHTML+=`<tr><td>${matName.value}</td><td class="right">${cost.toFixed(2)}</td></tr>`;
-    const total=mats.reduce((a,b)=>a+b,0);
-    costEl.textContent=total.toFixed(2);
-    const sp=parseFloat(sellPrice.value);
-    if(!isNaN(sp))margin.textContent=((sp-total)/sp*100).toFixed(2)+"%";
-  }
-
-  const stockName=document.getElementById("stockName");
-  const stockQty=document.getElementById("stockQty");
-  const matName=document.getElementById("matName");
-  const matQty=document.getElementById("matQty");
-  const matPrice=document.getElementById("matPrice");
-  const matTable=document.getElementById("matTable");
-  const costEl=document.getElementById("cost");
-  const margin=document.getElementById("margin");
-  const sellPrice=document.getElementById("sellPrice");
-
+/* ===== СКЛАД ===== */
+function addStock(){
+  const n=stockName.value,q=parseFloat(stockQty.value),u=stockUnit.value;
+  if(!n||isNaN(q))return;
+  stock.push({n,q,u});
+  saveStock();
+  stockName.value=stockQty.value="";
   renderStock();
-
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.onclick=()=>{
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-      t.classList.add("active");
-      document.getElementById(t.dataset.tab).classList.add("active");
+}
+function renderStock(){
+  stockTable.innerHTML="";
+  stock.forEach(s=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${s.n}</td><td>${s.u}</td><td class="right">${s.q}</td>`;
+    tr.ondblclick=()=>{
+      const v=prompt("Новий залишок:",s.q);
+      if(v!==null){s.q=parseFloat(v);saveStock();renderStock();}
     }
+    stockTable.appendChild(tr);
   });
+}
+renderStock();
+
+/* ===== ОБЩИЙ ===== */
+function addGeneral(){
+  const q=parseFloat(genQty.value),p=parseFloat(genPrice.value);
+  if(isNaN(q)||isNaN(p))return;
+  const c=q*p;
+  general.push(c);
+  genTable.innerHTML+=`<tr><td>${genName.value}</td><td class="right">${c.toFixed(2)}</td></tr>`;
+  genTotal.textContent=general.reduce((a,b)=>a+b,0).toFixed(2);
+  genName.value=genQty.value=genPrice.value="";
+}
+
+/* ===== ОДНА СВЕЧА ===== */
+function addOne(){
+  const q=parseFloat(oneQty.value),p=parseFloat(oneCost.value);
+  if(isNaN(q)||isNaN(p))return;
+  const c=(q/1000)*p;
+  one.push(c);
+  oneTable.innerHTML+=`<tr><td>${oneMat.value}</td><td class="right">${c.toFixed(2)}</td></tr>`;
+  const total=one.reduce((a,b)=>a+b,0);
+  oneTotal.textContent=total.toFixed(2);
+  const price=parseFloat(onePrice.value);
+  if(!isNaN(price)){
+    oneProfit.textContent=(price-total).toFixed(2);
+    oneMargin.textContent=(((price-total)/price)*100).toFixed(2)+"%";
+  }
+  oneMat.value=oneQty.value=oneCost.value="";
+}
+function saveCandle(){
+  candles.push({
+    n:oneName.value,
+    c:parseFloat(oneTotal.textContent),
+    p:parseFloat(onePrice.value)
+  });
+  renderCandles();
+}
+function renderCandles(){
+  candlesTable.innerHTML="";
+  candles.forEach(c=>{
+    const m=((c.p-c.c)/c.p*100).toFixed(2);
+    candlesTable.innerHTML+=`<tr><td>${c.n}</td><td class="right">${c.c}</td><td class="right">${c.p}</td><td class="right">${m}</td></tr>`;
+  });
+}
+
+/* ===== ГОТОВЫЕ ===== */
+function addFinished(){
+  const q=parseFloat(finQty.value),p=parseFloat(finPrice.value);
+  if(isNaN(q)||isNaN(p))return;
+  finTable.innerHTML+=`<tr><td>${finName.value}</td><td class="right">${q}</td><td class="right">${(q*p).toFixed(2)}</td></tr>`;
+  finName.value=finQty.value=finPrice.value="";
+}
+
+/* ===== ТАБЫ ===== */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById(t.dataset.tab).classList.add("active");
+  }
+});
 </script>
 
-<!-- PWA service worker -->
+<!-- PWA -->
 <script>
-if ("serviceWorker" in navigator) {
+if("serviceWorker" in navigator){
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
